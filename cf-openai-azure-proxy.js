@@ -37,7 +37,7 @@ async function handleRequest(request,res, path) {
   
   const authKey = request.get('Authorization');
   if (!authKey) {
-    res.status(409).send('Not allowed');
+    res.status(403).send('Not allowed');
     return;
   }
 
