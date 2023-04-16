@@ -8,9 +8,10 @@ const deployNameGPT4 = DEPLOY_NAME_GPT4;
 
 const apiVersion = "2023-03-15-preview";
 
-addEventListener("fetch", (event) => {
-  event.respondWith(handleRequest(event.request));
-});
+// gpt4: 删掉这一行
+// addEventListener("fetch", (event) => {
+//   event.respondWith(handleRequest(event.request));
+// });
 
 async function handleRequest(request) {
   if (request.method === 'OPTIONS') {
