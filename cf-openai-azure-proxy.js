@@ -155,3 +155,7 @@ async function handleOPTIONS(request) {
       }
     })
 }
+
+module.exports = {
+  handleRequest
+};
