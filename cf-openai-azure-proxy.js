@@ -62,13 +62,19 @@ async function handleRequest(request,res, path) {
 
   let { readable, writable } = new TransformStream()
   const response = await fetch(fetchAPI, payload);
-  res.status(response.status);
-  res.set(response.headers);
-  if (response.body) {
-    await stream(response.body, res);
-  } else {
-    res.end();
+  if (response.status !== 200) {
+    res.status(response.status).send(response.statusText);
+    return;
   }
+  res.setHeader('Content-Type', response.headers.get('Content-Type'));
+  await stream(response.body, res);
+  // res.status(response.status);
+  // res.set(response.headers);
+  // if (response.body) {
+  //   await stream(response.body, res);
+  // } else {
+  //   res.end();
+  // }
   // stream(response.body, writable);
   // return new Response(readable, response);
 }
@@ -125,13 +131,12 @@ function getModelMapper(model) {
 //   await writer.close();
 // }
 
-async function stream(readable, writable) {
+async function stream(readable, res) {
   const reader = readable.getReader();
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-  const newline = "\n";
-  const delimiter = "\n\n"
-  const encodedNewline = encoder.encode(newline);
+  const delimiter = "\n\n";
+  const encodedNewline = encoder.encode("\n");
 
   let buffer = "";
   while (true) {
@@ -139,12 +144,12 @@ async function stream(readable, writable) {
     if (done) {
       break;
     }
-    buffer += decoder.decode(value, { stream: true });
+    buffer += decoder.decode(value, { stream: true }); // stream: true is important here,fix the bug of incomplete line
     let lines = buffer.split(delimiter);
 
     // Loop through all but the last line, which may be incomplete.
     for (let i = 0; i < lines.length - 1; i++) {
-      await writable.write(lines[i] + delimiter);
+      res.write(lines[i] + delimiter);
       await sleep(30);
     }
 
@@ -152,10 +157,10 @@ async function stream(readable, writable) {
   }
 
   if (buffer) {
-    await writable.write(buffer);
+    res.write(buffer);
   }
-  await writable.write(encodedNewline);
-  await writable.end();
+  res.write(encodedNewline);
+  res.end();
 }
 
 
