@@ -33,14 +33,14 @@ async function handleRequest(request, path) {
   
   let body;
   if (request.method === 'POST') {
-    body = await request.json();
+    body = await request.body;
   }
   const modelName = body && body.model ? body.model : "gpt-3.5-turbo";
   const { resourceName, deployName } = getModelMapper(modelName);
 
   const fetchAPI = `https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/${path}?api-version=${apiVersion}`
   
-  const authKey = request.headers.get('Authorization');
+  const authKey = request.headers['Authorization'];
   if (!authKey) {
     return new Response("Not allowed", {
       status: 403
