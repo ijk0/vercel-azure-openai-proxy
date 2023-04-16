@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.all("*", async (req, res) => {
   try {
-    const response = await cloudflareWorker.handleRequest(req, req.path);
+    const response = await cloudflareWorker.handleRequest(req,res, req.path);
     res.status(response.status).send(response.body);
   } catch (error) {
     console.error(error);
