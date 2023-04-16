@@ -29,7 +29,7 @@ async function handleRequest(request,res, path) {
   } else {
     // return new Response('404 Not Found', { status: 404 })
     res.status(404).send('404 Not Found');
-    return;
+    return { status: 404, body: '404 Not Found' };
   }
   
   let body;
@@ -48,7 +48,7 @@ async function handleRequest(request,res, path) {
     //   status: 403
     // });
     res.status(403).send('Not allowed');
-    return;
+    return { status: 403, body: 'Not allowed' };
   }
 
   const payload = {
@@ -64,7 +64,7 @@ async function handleRequest(request,res, path) {
   const response = await fetch(fetchAPI, payload);
   if (response.status !== 200) {
     res.status(response.status).send(response.statusText);
-    return;
+    return { status: response.status, body: response.statusText };
   }
   res.setHeader('Content-Type', response.headers.get('Content-Type'));
   await stream(response.body, res);
