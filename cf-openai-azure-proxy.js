@@ -13,12 +13,13 @@ const apiVersion = "2023-03-15-preview";
 //   event.respondWith(handleRequest(event.request));
 // });
 
-async function handleRequest(request) {
+async function handleRequest(request, originalUrl) {
   if (request.method === 'OPTIONS') {
     return handleOPTIONS(request)
   }
 
-  const url = new URL(request.url);
+  // const url = new URL(request.url);
+  const url = new URL(originalUrl);
   if (url.pathname === '/v1/chat/completions') {
     var path="chat/completions"
   } else if (url.pathname === '/v1/completions') {
