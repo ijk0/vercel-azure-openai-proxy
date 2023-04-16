@@ -68,6 +68,7 @@ async function handleRequest(request,res, path) {
   }
   res.setHeader('Content-Type', response.headers.get('Content-Type'));
   await stream(response.body, res);
+  return { status: response.status, body: response.body }; // Add this line
   // res.status(response.status);
   // res.set(response.headers);
   // if (response.body) {
