@@ -29,7 +29,7 @@ async function handleRequest(request,res, path) {
   } else {
     // return new Response('404 Not Found', { status: 404 })
     res.status(404).send('404 Not Found');
-    return { status: 404, body: '404 Not Found' };
+    return;
   }
   
   let body;
@@ -48,7 +48,7 @@ async function handleRequest(request,res, path) {
     //   status: 403
     // });
     res.status(403).send('Not allowed');
-    return { status: 403, body: 'Not allowed' };
+    return;
   }
 
   const payload = {
@@ -60,24 +60,14 @@ async function handleRequest(request,res, path) {
     body: typeof body === 'object' ? JSON.stringify(body) : '{}',
   };
 
-  let { readable, writable } = new TransformStream()
+  // let { readable, writable } = new TransformStream()
   const response = await fetch(fetchAPI, payload);
   if (response.status !== 200) {
     res.status(response.status).send(response.statusText);
-    return { status: response.status, body: response.statusText };
+    return;
   }
   res.setHeader('Content-Type', response.headers.get('Content-Type'));
   await stream(response.body, res);
-  return { status: response.status, body: response.body }; // Add this line
-  // res.status(response.status);
-  // res.set(response.headers);
-  // if (response.body) {
-  //   await stream(response.body, res);
-  // } else {
-  //   res.end();
-  // }
-  // stream(response.body, writable);
-  // return new Response(readable, response);
 }
 
 function sleep(ms) {
@@ -93,44 +83,6 @@ function getModelMapper(model) {
     throw new Error("Invalid model specified");
   }
 }
-
-// support printer mode and add newline
-// async function stream(readable, writable) {
-//   const reader = readable.getReader();
-//   const writer = writable.getWriter();
-
-//   // const decoder = new TextDecoder();
-//   const encoder = new TextEncoder();
-//   const decoder = new TextDecoder();
-// // let decodedValue = decoder.decode(value);
-//   const newline = "\n";
-//   const delimiter = "\n\n"
-//   const encodedNewline = encoder.encode(newline);
-
-//   let buffer = "";
-//   while (true) {
-//     let { value, done } = await reader.read();
-//     if (done) {
-//       break;
-//     }
-//     buffer += decoder.decode(value, { stream: true }); // stream: true is important here,fix the bug of incomplete line
-//     let lines = buffer.split(delimiter);
-
-//     // Loop through all but the last line, which may be incomplete.
-//     for (let i = 0; i < lines.length - 1; i++) {
-//       await writer.write(encoder.encode(lines[i] + delimiter));
-//       await sleep(30);
-//     }
-
-//     buffer = lines[lines.length - 1];
-//   }
-
-//   if (buffer) {
-//     await writer.write(encoder.encode(buffer));
-//   }
-//   await writer.write(encodedNewline)
-//   await writer.close();
-// }
 
 async function stream(readable, res) {
   const reader = readable.getReader();
@@ -164,7 +116,6 @@ async function stream(readable, res) {
   res.end();
 }
 
-
 async function handleModels(request, res) {
   const data = {
     "object": "list",
@@ -191,21 +142,10 @@ async function handleModels(request, res) {
       "parent": null
     }]
   };
-  // const json = JSON.stringify(data, null, 2);
-  // return new Response(json, {
-  //   headers: { 'Content-Type': 'application/json' },
-  // });
   res.status(200).json(data);
 }
 
 async function handleOPTIONS(request, res) {
-    // return new Response(null, {
-    //   headers: {
-    //     'Access-Control-Allow-Origin': '*',
-    //     'Access-Control-Allow-Methods': '*',
-    //     'Access-Control-Allow-Headers': '*'
-    //   }
-    // })
     res.set({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*',
