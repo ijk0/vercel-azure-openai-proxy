@@ -35,7 +35,7 @@ async function handleRequest(request,res, path) {
 
   const fetchAPI = `https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/${path}?api-version=${apiVersion}`
   
-  const authKey = request.headers['Authorization'];
+  const authKey = request.get('Authorization');
   if (!authKey) {
     res.status(409).send('Not allowed');
     return;
