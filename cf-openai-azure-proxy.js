@@ -13,9 +13,9 @@ const apiVersion = "2023-03-15-preview";
 //   event.respondWith(handleRequest(event.request));
 // });
 
-async function handleRequest(request, path) {
+async function handleRequest(request,res, path) {
   if (request.method === 'OPTIONS') {
-    return handleOPTIONS(request)
+    return handleOPTIONS(request, res)
   }
 
   // const url = new URL(request.url);
@@ -25,15 +25,17 @@ async function handleRequest(request, path) {
   } else if (url.pathname === '/v1/completions') {
     var path="completions"
   } else if (url.pathname === '/v1/models') {
-    return handleModels(request)
+    return handleModels(request, res)
   } else {
-    return new Response('404 Not Found', { status: 404 })
+    // return new Response('404 Not Found', { status: 404 })
+    res.status(404).send('404 Not Found');
+    return;
   }
- 
   
   let body;
   if (request.method === 'POST') {
-    body = await request.body;
+    // body = await request.body;
+    body = request.body;
   }
   const modelName = body && body.model ? body.model : "gpt-3.5-turbo";
   const { resourceName, deployName } = getModelMapper(modelName);
@@ -42,9 +44,11 @@ async function handleRequest(request, path) {
   
   const authKey = request.headers['Authorization'];
   if (!authKey) {
-    return new Response("Not allowed", {
-      status: 403
-    });
+    // return new Response("Not allowed", {
+    //   status: 403
+    // });
+    res.status(403).send('Not allowed');
+    return;
   }
 
   const payload = {
@@ -58,9 +62,15 @@ async function handleRequest(request, path) {
 
   let { readable, writable } = new TransformStream()
   const response = await fetch(fetchAPI, payload);
-  stream(response.body, writable);
-  return new Response(readable, response);
-
+  res.status(response.status);
+  res.set(response.headers);
+  if (response.body) {
+    await stream(response.body, res);
+  } else {
+    res.end();
+  }
+  // stream(response.body, writable);
+  // return new Response(readable, response);
 }
 
 function sleep(ms) {
@@ -78,14 +88,47 @@ function getModelMapper(model) {
 }
 
 // support printer mode and add newline
+// async function stream(readable, writable) {
+//   const reader = readable.getReader();
+//   const writer = writable.getWriter();
+
+//   // const decoder = new TextDecoder();
+//   const encoder = new TextEncoder();
+//   const decoder = new TextDecoder();
+// // let decodedValue = decoder.decode(value);
+//   const newline = "\n";
+//   const delimiter = "\n\n"
+//   const encodedNewline = encoder.encode(newline);
+
+//   let buffer = "";
+//   while (true) {
+//     let { value, done } = await reader.read();
+//     if (done) {
+//       break;
+//     }
+//     buffer += decoder.decode(value, { stream: true }); // stream: true is important here,fix the bug of incomplete line
+//     let lines = buffer.split(delimiter);
+
+//     // Loop through all but the last line, which may be incomplete.
+//     for (let i = 0; i < lines.length - 1; i++) {
+//       await writer.write(encoder.encode(lines[i] + delimiter));
+//       await sleep(30);
+//     }
+
+//     buffer = lines[lines.length - 1];
+//   }
+
+//   if (buffer) {
+//     await writer.write(encoder.encode(buffer));
+//   }
+//   await writer.write(encodedNewline)
+//   await writer.close();
+// }
+
 async function stream(readable, writable) {
   const reader = readable.getReader();
-  const writer = writable.getWriter();
-
-  // const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-// let decodedValue = decoder.decode(value);
   const newline = "\n";
   const delimiter = "\n\n"
   const encodedNewline = encoder.encode(newline);
@@ -96,12 +139,12 @@ async function stream(readable, writable) {
     if (done) {
       break;
     }
-    buffer += decoder.decode(value, { stream: true }); // stream: true is important here,fix the bug of incomplete line
+    buffer += decoder.decode(value, { stream: true });
     let lines = buffer.split(delimiter);
 
     // Loop through all but the last line, which may be incomplete.
     for (let i = 0; i < lines.length - 1; i++) {
-      await writer.write(encoder.encode(lines[i] + delimiter));
+      await writable.write(lines[i] + delimiter);
       await sleep(30);
     }
 
@@ -109,13 +152,14 @@ async function stream(readable, writable) {
   }
 
   if (buffer) {
-    await writer.write(encoder.encode(buffer));
+    await writable.write(buffer);
   }
-  await writer.write(encodedNewline)
-  await writer.close();
+  await writable.write(encodedNewline);
+  await writable.end();
 }
 
-async function handleModels(request) {
+
+async function handleModels(request, res) {
   const data = {
     "object": "list",
     "data": [ {
@@ -141,20 +185,26 @@ async function handleModels(request) {
       "parent": null
     }]
   };
-  const json = JSON.stringify(data, null, 2);
-  return new Response(json, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  // const json = JSON.stringify(data, null, 2);
+  // return new Response(json, {
+  //   headers: { 'Content-Type': 'application/json' },
+  // });
+  res.status(200).json(data);
 }
 
-async function handleOPTIONS(request) {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*'
-      }
-    })
+async function handleOPTIONS(request, res) {
+    // return new Response(null, {
+    //   headers: {
+    //     'Access-Control-Allow-Origin': '*',
+    //     'Access-Control-Allow-Methods': '*',
+    //     'Access-Control-Allow-Headers': '*'
+    //   }
+    // })
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*'
+    }).status(200).send();
 }
 
 module.exports = {
