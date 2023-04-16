@@ -1,10 +1,10 @@
 // The name of your Azure OpenAI Resource for GPT-3.5 and GPT-4.
-const resourceNameGPT35 = RESOURCE_NAME_GPT35;
-const resourceNameGPT4 = RESOURCE_NAME_GPT4;
+const resourceNameGPT35 = process.env.RESOURCE_NAME_GPT35;
+const resourceNameGPT4 = process.env.RESOURCE_NAME_GPT4;
 
 // The deployment name you chose when you deployed the model for GPT-3.5 and GPT-4.
-const deployNameGPT35 = DEPLOY_NAME_GPT35;
-const deployNameGPT4 = DEPLOY_NAME_GPT4;
+const deployNameGPT35 = process.env.DEPLOY_NAME_GPT35;
+const deployNameGPT4 = process.env.DEPLOY_NAME_GPT4;
 
 const apiVersion = "2023-03-15-preview";
 
