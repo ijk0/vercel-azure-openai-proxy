@@ -1,44 +1,22 @@
-# cf-openai-azure-proxy
+# vercel-openai-azure-proxy
 
 <a href="./README_en.md">English</a> |
 <a href="./README.md">中文</a>
 
-> Most OpenAI clients do not support Azure OpenAI Service, but the application for Azure OpenAI Service is very simple, and it also provides free quotas. This script uses a free Cloudflare Worker as a proxy, allowing OpenAI-supported clients to directly use Azure OpenAI Service.
+> Most OpenAI clients do not support Azure OpenAI Service, but applying for and binding cards in Azure OpenAI Service is very simple, and it also provides free quotas. This script uses the free Vercel as a proxy, allowing OpenAI clients to directly use Azure OpenAI Service.
 
-This script proxies requests to Azure OpenAI Service for OpenAI clients. The code deployment steps are as follows:
+Proxy OpenAI requests to Azure OpenAI Service, deployment steps:
 
-Register and log in to your Cloudflare account.
-- Create a new Cloudflare Worker.
-- Copy and paste cf-openai-azure-proxy.js into the Cloudflare Worker editor.
-- Adjust the values of **resourceName** and **deployName** by either direct modification or using environment variables..
-- Save and deploy the Cloudflare Worker.
-- https://github.com/haibbo/cf-openai-azure-proxy/issues/3 Optional: Bind a custom domain name: Add a custom domain name for this worker in the Worker details page -> Trigger -> Custom Domains.
+1. Log in to Vercel and connect your GitHub account
+2. Create a project by importing the Git repository
+3. Create environment variables
 
-## Instructions
-First obtain the resourceName and deployName, and log in to the Azure portal:
-![azure](https://user-images.githubusercontent.com/1295315/229705215-e0556c99-957f-4d98-99a6-1c51254110b9.png)
+   ```Shell
+   RESOURCE_NAME_GPT4  // OpenAI service resource name
+   RESOURCE_NAME_GPT35 // OpenAI service resource name
+   DEPLOY_NAME_GPT4    // The deployed GPT4 model name
+   DEPLOY_NAME_GPT35   // The deployed GPT3.5 model name
+   ```
+4. After deployment is complete, you can also add a custom domain. Modify the CNAME to enable direct access.
 
-#### There are two ways to do this:
-- Directly modify their values, such as:
-```js
-// The name of your Azure OpenAI Resource.
-const resourceName="codegpt"
-
-// The deployment name you chose when you deployed the model.
-const deployName="gpt3
-```
-- go to the Cloudflare Worker console, navigate to Workers script > Settings > Add variable under Environment Variables.
-<img width="777" src="https://user-images.githubusercontent.com/1295315/232183839-b4baa414-76d4-4ccd-8d27-440edfab1404.png" alt="env" />
-
-## Client
-Take OpenCat as an example: fill in the custom API domain name with the domain name bound in step 6:
-
-<img width="339" src="https://user-images.githubusercontent.com/1295315/229820705-ab2ad1d1-8795-4670-97b4-16a0f9fdebba.png" alt="opencat" />
-I have tried multiple clients. If you encounter problems with other clients, please feel free to create an issue.
-
-QA:
-
-- Do I need a server to use this?
-  - This script runs on Cloudflare Worker and does not require a server or a bound card. It is free for up to 100,000 requests per day.
-- Do I need my own domain name to use this?
-  - No, it is not necessary. Refer to: https://github.com/haibbo/cf-openai-azure-proxy/issues/3
+This project is forked from [cf-openai-azure-proxy](https://github.com/haibbo/cf-openai-azure-proxy), and deploying to Vercel is inspired by the [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) project.

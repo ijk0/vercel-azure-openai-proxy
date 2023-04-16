@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Import your existing code
-const cloudflareWorker = require("./cf-openai-azure-proxy.js");
+const cloudflareWorker = require("./vercel-openai-azure-proxy.js");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
