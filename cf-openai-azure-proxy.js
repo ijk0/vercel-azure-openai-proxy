@@ -8,11 +8,6 @@ const deployNameGPT4 = process.env.DEPLOY_NAME_GPT4;
 
 const apiVersion = "2023-03-15-preview";
 
-// gpt4: 删掉这一行
-// addEventListener("fetch", (event) => {
-//   event.respondWith(handleRequest(event.request));
-// });
-
 async function handleRequest(request,res, path) {
   if (request.method === 'OPTIONS') {
     return handleOPTIONS(request, res)
@@ -27,14 +22,12 @@ async function handleRequest(request,res, path) {
   } else if (url.pathname === '/v1/models') {
     return handleModels(request, res)
   } else {
-    // return new Response('404 Not Found', { status: 404 })
     res.status(404).send('404 Not Found');
     return;
   }
   
   let body;
   if (request.method === 'POST') {
-    // body = await request.body;
     body = request.body;
   }
   const modelName = body && body.model ? body.model : "gpt-3.5-turbo";
@@ -44,10 +37,7 @@ async function handleRequest(request,res, path) {
   
   const authKey = request.headers['Authorization'];
   if (!authKey) {
-    // return new Response("Not allowed", {
-    //   status: 403
-    // });
-    res.status(403).send('Not allowed');
+    res.status(409).send('Not allowed');
     return;
   }
 
@@ -105,7 +95,6 @@ async function stream(readable, res) {
       res.write(lines[i] + delimiter);
       await sleep(30);
     }
-
     buffer = lines[lines.length - 1];
   }
 
